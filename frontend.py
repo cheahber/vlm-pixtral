@@ -59,7 +59,7 @@ def update_prompt(prompt):
 def display_system_status(video, model, prompt):
     st.markdown("### System Status")
     with st.container(border=True):
-        st.write(f"**Uploaded Video:** {video.name if video else 'No video uploaded'}")
+        st.write(f"**Uploaded Video:** {video if video else 'No video uploaded'}")
         st.write(f"**Selected Model:** {model}")
         st.write(f"**Prompt:** {prompt}")
 
@@ -127,9 +127,20 @@ elif stop_vlm:
         st.sidebar.error(message)
 
 # Video Upload
-video_path = st.sidebar.file_uploader("Step 2: Upload your video file", type=["mp4", "avi", "mov", "mkv"])
-if video_path:
-    status, message, data = update_video_path(video_path.name)
+uploaded_file = st.sidebar.file_uploader("Step 2: Upload your video file", type=["mp4", "avi", "mov", "mkv"])
+
+import tempfile
+import os
+
+video_path = None
+
+if uploaded_file:
+    temp_dir = tempfile.mkdtemp()
+    video_path = os.path.join(temp_dir, uploaded_file.name)
+    with open(video_path, "wb") as f:
+        f.write(uploaded_file.getvalue())
+
+    status, message, data = update_video_path(video_path)
     if status == "success":
         st.sidebar.success(message)
     else:
